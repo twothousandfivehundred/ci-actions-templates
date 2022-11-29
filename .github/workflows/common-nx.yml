@@ -1,4 +1,4 @@
-name: "Common NX production"
+name: "Common NX"
 
 on:
   workflow_call:
@@ -11,14 +11,21 @@ on:
         description: Folder path where the built output is stored
         type: string
         default: './dist'
+      target_branch_name:
+        description: Name of the target branch you will be merging to
+        default: 'develop'
+      build_environment:
+        description: Type of environment to build for
+        default: 'development' 
 
 jobs:
-  common-nx-production:
+  common-nx:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout the repo
         uses: actions/checkout@v3
         with:
+          persist-credentials: false
           fetch-depth: 0
       - name: Setup the correct node
         uses: actions/setup-node@v3
@@ -27,12 +34,16 @@ jobs:
           cache: "npm"
           registry-url: "https://npm.pkg.github.com"
           cache-dependency-path: "**/package-lock.json"
-      - name: Provide context to main branch
-        run: "git branch --track main origin/main"
+      - name: Provide context to target branch
+        run: "git branch --track ${{ inputs.target_branch_name }} origin/${{ inputs.target_branch_name }}"
       - name: Create SHA's of head and base for affected to work
         uses: nrwl/nx-set-shas@v3
+      - name: Provide credentials for private repo installs
+        uses: webfactory/ssh-agent@v0.2.0
+        with:
+            ssh-private-key: ${{ secrets.private_ssh }}
       - name: npm install for CI
-        run: npm ci --no-progress --no-optional --no-audit --ignore-scripts=false --prefer-offline
+        run: npm ci
 
       - name: Lint nx specific workspace files
         run: npx nx workspace-lint
@@ -43,7 +54,7 @@ jobs:
       - name: Test affected packages/libs
         run: npx nx affected --target=test --parallel=3 --ci --code-coverage
       - name: Build affected packages/libs
-        run: npx nx affected --target=build --parallel=3
+        run: npx nx affected --target=build --parallel=3 --configuration=${{ inputs.build_environment }}
 
       - name: Upload the built output to artifacts
         uses: actions/upload-artifact@v3
