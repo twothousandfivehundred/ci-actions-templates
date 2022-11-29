@@ -1,0 +1,59 @@
+name: "Sync to S3"
+
+on:
+  workflow_call:
+    inputs:
+      aws_account:
+        description: AWS Account to sync to
+        required: true
+        type: string
+      sync_environment:
+        description: AWS environment to sync to
+        required: true
+        type: string
+      cache_key:
+        description: Key of the previously built and stored cache
+        required: true
+        type: string
+      deployed_site_url:
+        description: URL of the website that will be deployed
+        required: true
+        type: string
+      bucket_name:
+        description: Name of the s3 bucket where files should be copied to
+        required: true
+        type: string
+      folder_path:
+        description: Folder path within the cache to sync
+        type: string
+        default: './'
+
+jobs:
+  sync-to-s3:
+    runs-on: ubuntu-latest
+    env:
+      ENVIRONMENT: ${{ inputs.sync_environment }}
+    concurrency: ${{ inputs.sync_environment }}
+    permissions:
+      contents: read
+      id-token: write
+    environment:
+      name: ${{ inputs.sync_environment }}
+      url: ${{ inputs.deployed_site_url }}
+    steps:
+      - name: Configure AWS credentials
+        id: creds
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-region: ap-southeast-2
+          role-to-assume: arn:aws:iam::${{ inputs.aws_account }}:role/GitHubDeploymentRole
+      - name: Download cached artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: ${{ inputs.cache_key }}
+      - name: Install AWS CLI
+        uses: unfor19/install-aws-cli-action@master
+        with:
+          version: "2"
+      - name: Sync extracted cached artifacts up to s3
+        run: aws s3 sync ${{ inputs.folder_path }} s3://${{ inputs.bucket_name }} --acl public-read --delete

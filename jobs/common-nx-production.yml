@@ -1,0 +1,46 @@
+name: CI
+on:
+  push:
+    branches:
+      - 'main'
+
+jobs:
+  main:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the repo
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Setup the correct node
+        uses: actions/setup-node@v3
+        with:
+          node-version-file: .nvmrc
+          cache: "npm"
+          registry-url: "https://npm.pkg.github.com"
+          cache-dependency-path: "**/package-lock.json"
+      - name: Provide context to main branch
+        run: "git branch --track main origin/main"
+      - name: Create SHA's of head and base for affected to work
+        uses: nrwl/nx-set-shas@v3
+      - name: npm install for CI
+        run: npm ci --no-progress --no-optional --no-audit --ignore-scripts=false --prefer-offline
+
+      - name: Lint nx specific workspace files
+        run: npx nx workspace-lint
+      - name: Check for unformatted files
+        run: npx nx format:check
+      - name: Lint affected packages/libs
+        run: npx nx affected --target=lint --parallel=3
+      - name: Test affected packages/libs
+        run: npx nx affected --target=test --parallel=3 --ci --code-coverage
+      - name: Build affected packages/libs
+        run: npx nx affected --target=build --parallel=3
+
+      - name: Upload the built output to artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: built-output
+          retention-days: 1
+          path: dist
+          if-no-files-found: error
