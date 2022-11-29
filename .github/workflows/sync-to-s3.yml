@@ -7,6 +7,10 @@ on:
         description: AWS Account to sync to
         required: true
         type: string
+      aws_region:
+        description: AWS region to sync to
+        required: true
+        type: string
       sync_environment:
         description: AWS environment to sync to
         required: true
@@ -45,8 +49,8 @@ jobs:
         id: creds
         uses: aws-actions/configure-aws-credentials@v1
         with:
-          aws-region: ap-southeast-2
-          role-to-assume: arn:aws:iam::${{ inputs.aws_account }}:role/GitHubDeploymentRole
+          aws-region: ${{ inputs.aws_region }}
+          role-to-assume: arn:aws:iam::${{ inputs.aws_account }}:role/GithubDeploymentRole
       - name: Download cached artifacts
         uses: actions/download-artifact@v3
         with:
