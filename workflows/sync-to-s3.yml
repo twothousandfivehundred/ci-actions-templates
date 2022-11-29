@@ -13,8 +13,8 @@ on:
         type: string
       cache_key:
         description: Key of the previously built and stored cache
-        required: true
         type: string
+        default: 'built-output'
       deployed_site_url:
         description: URL of the website that will be deployed
         required: true

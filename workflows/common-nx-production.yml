@@ -1,11 +1,19 @@
-name: CI
+name: "Common NX production"
+
 on:
-  push:
-    branches:
-      - 'main'
+  workflow_call:
+    inputs:
+      cache_key:
+        description: Key of the previously built and stored cache
+        type: string
+        default: 'built-output'
+      folder_path:
+        description: Folder path where the built output is stored
+        type: string
+        default: './dist'
 
 jobs:
-  main:
+  common-nx-production:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout the repo
@@ -40,7 +48,7 @@ jobs:
       - name: Upload the built output to artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: built-output
+          name: ${{ inputs.cache_key }}
           retention-days: 1
-          path: dist
+          path: ${{ inputs.folder_path }}
           if-no-files-found: error
