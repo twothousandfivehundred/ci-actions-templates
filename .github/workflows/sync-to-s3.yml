@@ -31,6 +31,10 @@ on:
         description: Folder path within the cache to sync
         type: string
         default: './'
+      acl_policy:
+        description: The AWS ACL policy that will be applied to your files
+        type: string
+        default: public-read
 
 jobs:
   sync-to-s3:
@@ -60,4 +64,4 @@ jobs:
         with:
           version: "2"
       - name: Sync extracted cached artifacts up to s3
-        run: aws s3 sync ${{ inputs.folder_path }} s3://${{ inputs.bucket_name }} --acl public-read --delete
+        run: aws s3 sync ${{ inputs.folder_path }} s3://${{ inputs.bucket_name }} --acl ${{ inputs.acl_policy }} --delete
