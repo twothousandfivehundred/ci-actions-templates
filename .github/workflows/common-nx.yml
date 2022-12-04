@@ -14,7 +14,8 @@ on:
       target_branch_name:
         description: Name of the target branch you will be merging to
         type: string
-        default: 'develop'
+        required: false
+        default: ''
       build_environment:
         description: Type of environment to build for
         type: string
@@ -43,6 +44,7 @@ jobs:
 
       - name: Provide context to target branch
         run: "git branch --track ${{ inputs.target_branch_name }} origin/${{ inputs.target_branch_name }}"
+        if: inputs.target_branch_name != ''
       - name: Create SHA's of head and base for affected to work
         uses: nrwl/nx-set-shas@v3
       - name: npm install for CI
