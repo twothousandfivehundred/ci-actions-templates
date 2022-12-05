@@ -56,6 +56,7 @@ jobs:
           aws-region: ${{ inputs.aws_region }}
           role-to-assume: arn:aws:iam::${{ inputs.aws_account }}:role/GithubDeploymentRole
       - name: Download cached artifacts
+        continue-on-error: true
         uses: actions/download-artifact@v3
         with:
           name: ${{ inputs.cache_key }}
