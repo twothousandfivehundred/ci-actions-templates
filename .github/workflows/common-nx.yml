@@ -43,8 +43,8 @@ jobs:
           ssh-private-key: ${{ secrets.PRIVATE_SSH }}
 
       - name: Provide context to target branch
-        run: "git branch --track ${{ inputs.target_branch_name }} origin/${{ inputs.target_branch_name }}"
         if: inputs.target_branch_name != ''
+        run: "git branch --track ${{ inputs.target_branch_name }} origin/${{ inputs.target_branch_name }}"
       - name: Create SHA's of head and base for affected to work
         uses: nrwl/nx-set-shas@v3
       - name: npm install for CI
