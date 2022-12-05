@@ -67,4 +67,4 @@ jobs:
           name: ${{ inputs.cache_key }}
           retention-days: 1
           path: ${{ inputs.folder_path }}
-          if-no-files-found: error
+          if-no-files-found: ignore
