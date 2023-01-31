@@ -18,7 +18,7 @@ on:
       cache_key:
         description: Key of the previously built and stored cache
         type: string
-        default: 'built-output'
+        default: "built-output"
       deployed_site_url:
         description: URL of the website that will be deployed
         required: true
@@ -30,7 +30,7 @@ on:
       folder_path:
         description: Folder path within the cache to sync
         type: string
-        default: './'
+        default: "./"
       acl_policy:
         description: The AWS ACL policy that will be applied to your files
         type: string
@@ -51,7 +51,7 @@ jobs:
     steps:
       - name: Configure AWS credentials
         id: creds
-        uses: aws-actions/configure-aws-credentials@v1
+        uses: aws-actions/configure-aws-credentials@v1-node16
         with:
           aws-region: ${{ inputs.aws_region }}
           role-to-assume: arn:aws:iam::${{ inputs.aws_account }}:role/GithubDeploymentRole
