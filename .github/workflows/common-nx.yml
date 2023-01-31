@@ -7,10 +7,6 @@ on:
         description: Key of the previously built and stored cache
         type: string
         default: "built-output"
-      node_modules_cache_key:
-        description: Key of the previously npm ci
-        type: string
-        default: "node-modules"
       folder_path:
         description: Folder path where the built output is stored
         type: string
@@ -71,12 +67,4 @@ jobs:
           name: ${{ inputs.cache_key }}
           retention-days: 1
           path: ${{ inputs.folder_path }}
-          if-no-files-found: ignore
-
-      - name: Upload node_modules to artifacts
-        uses: actions/upload-artifact@v3
-        with:
-          name: ${{ inputs.node_modules_cache_key }}
-          retention-days: 1
-          path: node_modules
           if-no-files-found: ignore
