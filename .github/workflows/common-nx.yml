@@ -20,10 +20,17 @@ on:
         description: Type of environment to build for
         type: string
         default: "development"
-
+      aws_region:
+        description: AWS region to sync to
+        required: true
+        type: string
+        default: "us-east-1"
 jobs:
   common-nx:
     runs-on: ubuntu-latest
+    env:
+      ENVIRONMENT: ${{ inputs.build_environment }}
+      AWS_DEFAULT_REGION: ${{ inputs.aws_region }}
     steps:
       - name: Checkout the repo
         uses: actions/checkout@v3
