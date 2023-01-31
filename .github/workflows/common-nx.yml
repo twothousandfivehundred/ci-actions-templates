@@ -25,12 +25,16 @@ on:
         required: true
         type: string
         default: "us-east-1"
+      actor_name:
+        description: user who is deploying this stack
+        type: string
 jobs:
   common-nx:
     runs-on: ubuntu-latest
     env:
       ENVIRONMENT: ${{ inputs.build_environment }}
       AWS_DEFAULT_REGION: ${{ inputs.aws_region }}
+      ACTOR_NAME: ${{ inputs.actor_name }}
     steps:
       - name: Checkout the repo
         uses: actions/checkout@v3
