@@ -58,6 +58,8 @@ jobs:
         run: "git branch --track ${{ inputs.target_branch_name }} origin/${{ inputs.target_branch_name }}"
       - name: Create SHA's of head and base for affected to work
         uses: nrwl/nx-set-shas@v3
+        with:
+          main-branch-name: ${{ inputs.target_branch_name }}
       - name: npm install for CI
         run: npm ci
 
