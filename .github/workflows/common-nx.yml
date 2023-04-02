@@ -59,17 +59,21 @@ jobs:
           main-branch-name: ${{ inputs.target_branch_name }}
       - name: npm install for CI
         run: npm ci
+      - name: nx print affected packages/libs
+        run: |
+          affected="$(echo -n "$(npx nx print-affected --target=build --base=${{ env.NX_BASE }} --head=${{ env.NX_HEAD }} --configuration=${{ inputs.build_environment }} --select=projects)")"
+          echo "affected packages/libs: $affected"
 
       - name: Lint nx specific workspace files
         run: npx nx workspace-lint
       - name: Check for unformatted files
         run: npx nx format:check
       - name: Lint affected packages/libs
-        run: npx nx affected --target=lint --parallel=3
+        run: npx nx affected --target=lint --head=${{ env.NX_HEAD }} --base=${{ env.NX_BASE }} --parallel=3
       - name: Test affected packages/libs
-        run: npx nx affected --target=test --parallel=3 --ci --code-coverage
+        run: npx nx affected --target=test --head=${{ env.NX_HEAD }} --base=${{ env.NX_BASE }} --parallel=3 --ci --code-coverage
       - name: Build affected packages/libs
-        run: npx nx affected --target=build --parallel=3 --configuration=${{ inputs.build_environment }}
+        run: npx nx affected --target=build --head=${{ env.NX_HEAD }} --base=${{ env.NX_BASE }} --parallel=3 --configuration=${{ inputs.build_environment }}
 
       - name: Upload the built output to artifacts
         uses: actions/upload-artifact@v3
