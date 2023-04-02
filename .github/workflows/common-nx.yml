@@ -3,6 +3,9 @@ name: "Common NX"
 on:
   workflow_call:
     inputs:
+      release_space:
+        type: string
+        default: ''
       cache_key:
         description: Key of the previously built and stored cache
         type: string
@@ -67,6 +70,18 @@ jobs:
         uses: webfactory/ssh-agent@v0.7.0
         with:
           ssh-private-key: ${{ secrets.PRIVATE_SSH }}
+      - name: Make envfile
+        uses: SpicyPizza/create-envfile@v1.3
+        with:
+          envkey_NX_RELEASE_SPACE: '"${{ inputs.release_space }}"'
+          file_name: .env
+          fail_on_empty: false
+      
+      - name: envfile contents
+        run: |
+          echo ".env contents start vvvvv"
+          cat .env
+          echo ".env contents end ^^^^"
 
       - name: Create SHA's of head and base for affected to work
         uses: nrwl/nx-set-shas@v3
