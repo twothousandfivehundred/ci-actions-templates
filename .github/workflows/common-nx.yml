@@ -76,12 +76,6 @@ jobs:
           envkey_NX_RELEASE_SPACE: '"${{ inputs.release_space }}"'
           file_name: .env
           fail_on_empty: false
-      
-      - name: envfile contents
-        run: |
-          echo ".env contents start vvvvv"
-          cat .env
-          echo ".env contents end ^^^^"
 
       - name: Create SHA's of head and base for affected to work
         uses: nrwl/nx-set-shas@v3
