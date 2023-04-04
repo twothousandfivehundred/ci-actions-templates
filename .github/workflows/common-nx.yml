@@ -93,7 +93,7 @@ jobs:
           echo "affected packages/libs: $affected"
 
           echo -ne "services_to_deploy=[" >> "$GITHUB_OUTPUT"
-          echo -ne $affected_services | sed 's/^/"/;s/$/"/' >> "$GITHUB_OUTPUT"
+          echo -ne $affected_services  | sed -e 's/,$//' -e 's/,/","/g' -e 's/^/"/' -e 's/$/"/' >> "$GITHUB_OUTPUT"
           echo "]" >> "$GITHUB_OUTPUT"
 
           echo -ne "has_services_to_deploy=" >> "$GITHUB_OUTPUT"
