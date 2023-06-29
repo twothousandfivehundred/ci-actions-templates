@@ -5,7 +5,7 @@ on:
     inputs:
       release_space:
         type: string
-        default: ''
+        default: ""
       cache_key:
         description: Key of the previously built and stored cache
         type: string
@@ -28,6 +28,10 @@ on:
         required: true
         type: string
         default: "us-east-1"
+      aws_account:
+        description: AWS Account to sync to
+        required: true
+        type: string
       actor_name:
         description: user who is deploying this stack
         type: string
@@ -51,6 +55,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       ENVIRONMENT: ${{ inputs.build_environment }}
+      AWS_DEFAULT_ACCOUNT: ${{ inputs.aws_account }}
       AWS_DEFAULT_REGION: ${{ inputs.aws_region }}
       ACTOR_NAME: ${{ inputs.actor_name }}
     steps:
