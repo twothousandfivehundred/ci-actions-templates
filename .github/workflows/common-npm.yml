@@ -1,4 +1,4 @@
-name: "Common CRA"
+name: "Common npm"
 
 on:
   workflow_call:
@@ -31,7 +31,7 @@ on:
         type: string
 
 jobs:
-  common-cra:
+  common-npm:
     runs-on: ubuntu-latest
     env:
       ENVIRONMENT: ${{ inputs.build_environment }}
