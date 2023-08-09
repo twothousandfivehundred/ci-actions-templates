@@ -1,0 +1,70 @@
+name: "Common CRA"
+
+on:
+  workflow_call:
+    inputs:
+      cache_key:
+        description: Key of the previously built and stored cache
+        type: string
+        default: "built-output"
+      folder_path:
+        description: Folder path where the built output is stored
+        type: string
+        default: "build"
+      target_branch_name:
+        description: Name of the target branch you will be merging to
+        type: string
+        required: false
+        default: ""
+      build_environment:
+        description: Type of environment to build for
+        type: string
+        default: "development"
+      aws_region:
+        description: AWS region to sync to
+        required: true
+        type: string
+        default: "us-east-1"
+      aws_account:
+        description: AWS Account to sync to
+        required: true
+        type: string
+
+jobs:
+  common-cra:
+    runs-on: ubuntu-latest
+    env:
+      ENVIRONMENT: ${{ inputs.build_environment }}
+      AWS_DEFAULT_ACCOUNT: ${{ inputs.aws_account }}
+      AWS_DEFAULT_REGION: ${{ inputs.aws_region }}
+    steps:
+      - name: Checkout the repo
+        uses: actions/checkout@v3
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Setup the correct node
+        uses: actions/setup-node@v3
+        with:
+          node-version-file: .nvmrc
+          cache: "npm"
+          registry-url: "https://npm.pkg.github.com"
+          cache-dependency-path: "**/package-lock.json"
+
+      - name: npm install for CI
+        run: npm ci
+
+      - name: Lint files
+        run: npm run lint
+      - name: Test files
+        run: npm run test
+      - name: Build files
+        run: npm run build
+
+      - name: Upload the built output to artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ inputs.cache_key }}
+          retention-days: 1
+          path: ${{ inputs.folder_path }}
+          if-no-files-found: ignore
