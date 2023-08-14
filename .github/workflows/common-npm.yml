@@ -3,6 +3,12 @@ name: "Common npm"
 on:
   workflow_call:
     inputs:
+      release_space:
+        type: string
+        default: ""
+      env_directory:
+        type: string
+        default: "./"
       cache_key:
         description: Key of the previously built and stored cache
         type: string
@@ -50,6 +56,13 @@ jobs:
           cache: "npm"
           registry-url: "https://npm.pkg.github.com"
           cache-dependency-path: "**/package-lock.json"
+      - name: Make envfile
+        uses: SpicyPizza/create-envfile@v1.3
+        with:
+          envkey_REACT_APP_RELEASE_SPACE: '"${{ inputs.release_space }}"'
+          directory: ${{ inputs.env_directory }}
+          file_name: .env
+          fail_on_empty: false
 
       - name: npm install for CI
         run: npm ci
