@@ -124,7 +124,7 @@ jobs:
         run: npx nx affected --target=build --head=${{ env.NX_HEAD }} --base=${{ env.NX_BASE }} --parallel=3 --configuration=${{ inputs.build_environment }}
 
       - name: Synth QPQ infrastructure
-        run: npx ts-node ./packages/services-deployment-awscdk/synthInfrastructure.ts
+        run: npx nx synth services-deployment-awscdk
 
       - name: Upload the built output to artifacts
         uses: actions/upload-artifact@v3
