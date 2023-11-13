@@ -60,6 +60,7 @@ jobs:
         uses: SpicyPizza/create-envfile@v1.3
         with:
           envkey_REACT_APP_RELEASE_SPACE: '"${{ inputs.release_space }}"'
+          envkey_REACT_APP_CACHEBREAK: '"${{ github.sha }}"'
           directory: ${{ inputs.env_directory }}
           file_name: .env
           fail_on_empty: false
