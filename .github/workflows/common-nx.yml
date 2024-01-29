@@ -113,8 +113,6 @@ jobs:
           echo "has_services_to_deploy: ${{ steps.affected.outputs.has_services_to_deploy }}"
           echo "should_upload_website: ${{ steps.affected.outputs.should_upload_website }}"
 
-      - name: Lint nx specific workspace files
-        run: npx nx workspace-lint
       - name: Check for unformatted files
         run: npx nx format:check
       - name: Lint affected packages/libs
