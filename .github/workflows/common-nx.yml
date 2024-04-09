@@ -113,6 +113,9 @@ jobs:
           echo "has_services_to_deploy: ${{ steps.affected.outputs.has_services_to_deploy }}"
           echo "should_upload_website: ${{ steps.affected.outputs.should_upload_website }}"
 
+      - name: Synth QPQ infrastructure
+        run: npx nx synth services-deployment-awscdk
+
       - name: Check for unformatted files
         run: npx nx format:check
       - name: Lint affected packages/libs
@@ -121,9 +124,6 @@ jobs:
         run: npx nx affected --target=test --head=${{ env.NX_HEAD }} --base=${{ env.NX_BASE }} --parallel=3 --ci --code-coverage
       - name: Build affected packages/libs
         run: npx nx affected --target=build --head=${{ env.NX_HEAD }} --base=${{ env.NX_BASE }} --parallel=3 --configuration=${{ inputs.build_environment }}
-
-      - name: Synth QPQ infrastructure
-        run: npx nx synth services-deployment-awscdk
 
       - name: Upload the built output to artifacts
         uses: actions/upload-artifact@v3
