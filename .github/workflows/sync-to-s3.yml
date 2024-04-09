@@ -67,4 +67,4 @@ jobs:
           version: "2"
       - name: Sync extracted cached artifacts up to s3
         if: ${{ success() }}
-        run: aws s3 sync ${{ inputs.folder_path }} s3://${{ inputs.bucket_name }} --acl ${{ inputs.acl_policy }} --delete
+        run: aws s3 sync ${{ inputs.folder_path }} s3://${{ inputs.bucket_name }} --acl ${{ inputs.acl_policy }}
