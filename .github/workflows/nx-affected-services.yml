@@ -57,7 +57,7 @@ jobs:
           ssh-private-key: ${{ secrets.PRIVATE_SSH }}
 
       - name: Make envfile
-        uses: SpicyPizza/create-envfile@v1.3
+        uses: SpicyPizza/create-envfile@v2.0.3
         with:
           envkey_NX_RELEASE_SPACE: '"${{ inputs.release_space }}"'
           envkey_NX_CACHEBREAK: '"${{ github.sha }}"'

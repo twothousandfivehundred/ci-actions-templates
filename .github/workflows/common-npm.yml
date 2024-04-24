@@ -60,7 +60,7 @@ jobs:
           registry-url: "https://npm.pkg.github.com"
           cache-dependency-path: "**/package-lock.json"
       - name: Make envfile
-        uses: SpicyPizza/create-envfile@v1.3
+        uses: SpicyPizza/create-envfile@v2.0.3
         with:
           envkey_REACT_APP_RELEASE_SPACE: '"${{ inputs.release_space }}"'
           envkey_REACT_APP_CACHEBREAK: '"${{ github.sha }}"'
