@@ -3,6 +3,9 @@ name: "Common NX"
 on:
   workflow_call:
     inputs:
+      runs_on:
+        type: string
+        default: "ubuntu-latest"
       release_space:
         type: string
         default: ""
@@ -52,7 +55,7 @@ jobs:
       services_to_deploy: ${{ steps.affected.outputs.services_to_deploy }}
       has_services_to_deploy: ${{ steps.affected.outputs.has_services_to_deploy }}
       should_upload_website: ${{ steps.affected.outputs.should_upload_website }}
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.runs_on }}
     env:
       ENVIRONMENT: ${{ inputs.build_environment }}
       AWS_DEFAULT_ACCOUNT: ${{ inputs.aws_account }}
@@ -60,19 +63,19 @@ jobs:
       ACTOR_NAME: ${{ inputs.actor_name }}
     steps:
       - name: Checkout the repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           persist-credentials: false
           fetch-depth: 0
       - name: Setup the correct node
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
           cache: "npm"
           registry-url: "https://npm.pkg.github.com"
           cache-dependency-path: "**/package-lock.json"
       - name: Provide credentials for private repo installs
-        uses: webfactory/ssh-agent@v0.7.0
+        uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: ${{ secrets.PRIVATE_SSH }}
       - name: Make envfile
@@ -84,7 +87,7 @@ jobs:
           fail_on_empty: false
 
       - name: Create SHA's of head and base for affected to work
-        uses: nrwl/nx-set-shas@v3
+        uses: nrwl/nx-set-shas@v4
         with:
           main-branch-name: ${{ inputs.target_branch_name }}
       - name: npm install for CI
@@ -126,7 +129,7 @@ jobs:
         run: npx nx affected --target=build --head=${{ env.NX_HEAD }} --base=${{ env.NX_BASE }} --parallel=3 --configuration=${{ inputs.build_environment }}
 
       - name: Upload the built output to artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ inputs.cache_key }}
           retention-days: 1

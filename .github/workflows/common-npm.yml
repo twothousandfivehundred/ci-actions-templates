@@ -3,6 +3,9 @@ name: "Common npm"
 on:
   workflow_call:
     inputs:
+      runs_on:
+        type: string
+        default: "ubuntu-latest"
       release_space:
         type: string
         default: ""
@@ -38,19 +41,19 @@ on:
 
 jobs:
   common-npm:
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.runs_on }}
     env:
       ENVIRONMENT: ${{ inputs.build_environment }}
       AWS_DEFAULT_ACCOUNT: ${{ inputs.aws_account }}
       AWS_DEFAULT_REGION: ${{ inputs.aws_region }}
     steps:
       - name: Checkout the repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           persist-credentials: false
           fetch-depth: 0
       - name: Setup the correct node
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
           cache: "npm"
@@ -76,7 +79,7 @@ jobs:
         run: npm run build
 
       - name: Upload the built output to artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ inputs.cache_key }}
           retention-days: 1

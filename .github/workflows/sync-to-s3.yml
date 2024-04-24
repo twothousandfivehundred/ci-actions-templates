@@ -3,6 +3,9 @@ name: 'Sync to S3'
 on:
   workflow_call:
     inputs:
+      runs_on:
+        type: string
+        default: "ubuntu-latest"
       aws_account:
         description: AWS Account to sync to
         required: true
@@ -42,7 +45,7 @@ on:
 
 jobs:
   sync-to-s3:
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.runs_on }}
     env:
       ENVIRONMENT: ${{ inputs.sync_environment }}
     concurrency: ${{ inputs.sync_environment }}
@@ -55,13 +58,13 @@ jobs:
     steps:
       - name: Configure AWS credentials
         id: creds
-        uses: aws-actions/configure-aws-credentials@v1-node16
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ${{ inputs.aws_region }}
           role-to-assume: arn:aws:iam::${{ inputs.aws_account }}:role/GithubDeploymentRole
       - name: Download cached artifacts
         continue-on-error: true
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: ${{ inputs.cache_key }}
           path: ${{ inputs.local_folder_path }}
