@@ -1,0 +1,97 @@
+name: 'Affected Services'
+
+on:
+  workflow_call:
+    inputs:
+      runs_on:
+        type: string
+        default: "ubuntu-latest"
+      release_space:
+        type: string
+        default: ''
+      target_branch_name:
+        description: Name of the target branch you will be merging to
+        type: string
+        required: false
+        default: ''
+      build_environment:
+        description: Type of environment to build for
+        type: string
+        default: 'development'
+    outputs:
+      services_to_deploy:
+        description: 'The services that should be deployed'
+        value: ${{ jobs.affected.outputs.services_to_deploy }}
+      has_services_to_deploy:
+        description: 'If there are services to deploy'
+        value: ${{ jobs.affected.outputs.has_services_to_deploy }}
+      should_upload_website:
+        description: 'If the website needs to be synced to s3'
+        value: ${{ jobs.affected.outputs.should_upload_website }}
+
+jobs:
+  affected:
+    outputs:
+      services_to_deploy: ${{ steps.affected.outputs.services_to_deploy }}
+      has_services_to_deploy: ${{ steps.affected.outputs.has_services_to_deploy }}
+      should_upload_website: ${{ steps.affected.outputs.should_upload_website }}
+    runs-on: ${{ inputs.runs_on }}
+    steps:
+      - name: Checkout the repo
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Setup the correct node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: 'npm'
+          registry-url: 'https://npm.pkg.github.com'
+          cache-dependency-path: '**/package-lock.json'
+
+      - name: Provide credentials for private repo installs
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.PRIVATE_SSH }}
+
+      - name: Make envfile
+        uses: SpicyPizza/create-envfile@v2.0.3
+        with:
+          envkey_NX_RELEASE_SPACE: '"${{ inputs.release_space }}"'
+          envkey_NX_CACHEBREAK: '"${{ github.sha }}"'
+          file_name: .env
+          fail_on_empty: false
+
+      - name: Create SHA's of head and base for affected to work
+        uses: nrwl/nx-set-shas@v3
+        with:
+          main-branch-name: ${{ inputs.target_branch_name }}
+
+      - name: npm install for CI
+        run: npm ci
+
+      - name: Setting affected variables
+        id: affected
+        run: |
+          affected="$(echo -n "$(npx nx show projects --affected --target=build --base=${{ env.NX_BASE }} --head=${{ env.NX_HEAD }})")"
+          affected_services="$(echo -n $affected | tr ', ' '\n' | grep -E '.*-service$' | sed 's/-service$//' | paste -sd "," - | sed 's/,$//')"
+          should_upload_website="$(echo -n $affected | tr ', ' '\n' | grep -E '^website$' | paste -sd "," - | sed 's/,$//')"
+          echo "affected packages/libs: $affected"
+
+          echo -ne "services_to_deploy=[" >> "$GITHUB_OUTPUT"
+          echo -ne $affected_services  | sed -e 's/,$//' -e 's/,/","/g' -e 's/^/"/' -e 's/$/"/' >> "$GITHUB_OUTPUT"
+          echo "]" >> "$GITHUB_OUTPUT"
+
+          echo -ne "has_services_to_deploy=" >> "$GITHUB_OUTPUT"
+          echo "$(if [ -z "$affected_services" ]; then echo "false"; else echo "true"; fi)" >> "$GITHUB_OUTPUT"
+
+          echo -ne "should_upload_website=" >> "$GITHUB_OUTPUT"
+          echo "$(if [ -z "$should_upload_website" ]; then echo "false"; else echo "true"; fi)" >> "$GITHUB_OUTPUT"
+
+      - name: Print variables
+        run: |
+          echo "services_to_deploy: ${{ steps.affected.outputs.services_to_deploy }}"
+          echo "has_services_to_deploy: ${{ steps.affected.outputs.has_services_to_deploy }}"
+          echo "should_upload_website: ${{ steps.affected.outputs.should_upload_website }}"
