@@ -25,6 +25,12 @@ on:
       has_services_to_deploy:
         description: 'If there are services to deploy'
         value: ${{ jobs.affected.outputs.has_services_to_deploy }}
+      service_views_to_deploy:
+        description: 'The service views that should be deployed'
+        value: ${{ jobs.affected.outputs.service_views_to_deploy }}
+      has_service_views_to_deploy:
+        description: 'If there are service views to deploy'
+        value: ${{ jobs.affected.outputs.has_service_views_to_deploy }}
       non_services_to_deploy:
         description: 'The non_services that should be deployed'
         value: ${{ jobs.affected.outputs.non_services_to_deploy }}
@@ -40,6 +46,8 @@ jobs:
     outputs:
       services_to_deploy: ${{ steps.affected.outputs.services_to_deploy }}
       has_services_to_deploy: ${{ steps.affected.outputs.has_services_to_deploy }}
+      service_views_to_deploy: ${{ steps.affected.outputs.service_views_to_deploy }}
+      has_service_views_to_deploy: ${{ steps.affected.outputs.has_service_views_to_deploy }}
       non_services_to_deploy: ${{ steps.affected.outputs.non_services_to_deploy }}
       has_non_services_to_deploy: ${{ steps.affected.outputs.has_non_services_to_deploy }}
       should_upload_website: ${{ steps.affected.outputs.should_upload_website }}
@@ -85,6 +93,7 @@ jobs:
         run: |
           affected="$(echo -n "$(npx nx show projects --affected --target=build --base=${{ env.NX_BASE }} --head=${{ env.NX_HEAD }})")"
           affected_services="$(echo -n $affected | tr ', ' '\n' | grep -E '.*-service$' | sed 's/-service$//' | paste -sd "," - | sed 's/,$//')"
+          affected_service_views="$(echo -n $affected | tr ', ' '\n' | grep -E '.*-service-views$' | sed 's/-service-views$//' | paste -sd "," - | sed 's/,$//')"
           affected_non_services="$(echo -n $affected | tr ', ' '\n' | grep -vE '(@kitted|kitted|.*-service$|^website$)' | paste -sd "," - | sed 's/,$//')"
           should_upload_website="$(echo -n $affected | tr ', ' '\n' | grep -E '^website$' | paste -sd "," - | sed 's/,$//')"
           echo "affected packages/libs: $affected"
@@ -95,6 +104,13 @@ jobs:
 
           echo -ne "has_services_to_deploy=" >> "$GITHUB_OUTPUT"
           echo "$(if [ -z "$affected_services" ]; then echo "false"; else echo "true"; fi)" >> "$GITHUB_OUTPUT"
+
+          echo -ne "service_views_to_deploy=[" >> "$GITHUB_OUTPUT"
+          echo -ne $affected_service_views  | sed -e 's/,$//' -e 's/,/","/g' -e 's/^/"/' -e 's/$/"/' >> "$GITHUB_OUTPUT"
+          echo "]" >> "$GITHUB_OUTPUT"
+
+          echo -ne "has_service_views_to_deploy=" >> "$GITHUB_OUTPUT"
+          echo "$(if [ -z "$affected_service_views" ]; then echo "false"; else echo "true"; fi)" >> "$GITHUB_OUTPUT"
 
           echo -ne "non_services_to_deploy=[" >> "$GITHUB_OUTPUT"
           echo -ne $affected_non_services  | sed -e 's/,$//' -e 's/,/","/g' -e 's/^/"/' -e 's/$/"/' >> "$GITHUB_OUTPUT"
@@ -110,6 +126,8 @@ jobs:
         run: |
           echo "services_to_deploy: ${{ steps.affected.outputs.services_to_deploy }}"
           echo "has_services_to_deploy: ${{ steps.affected.outputs.has_services_to_deploy }}"
+          echo "service_views_to_deploy: ${{ steps.affected.outputs.service_views_to_deploy }}"
+          echo "has_service_views_to_deploy: ${{ steps.affected.outputs.has_service_views_to_deploy }}"
           echo "non_services_to_deploy: ${{ steps.affected.outputs.non_services_to_deploy }}"
           echo "has_non_services_to_deploy: ${{ steps.affected.outputs.has_non_services_to_deploy }}"
           echo "should_upload_website: ${{ steps.affected.outputs.should_upload_website }}"
