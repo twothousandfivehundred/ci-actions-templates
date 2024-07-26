@@ -94,7 +94,7 @@ jobs:
           affected="$(echo -n "$(npx nx show projects --affected --target=build --base=${{ env.NX_BASE }} --head=${{ env.NX_HEAD }})")"
           affected_services="$(echo -n $affected | tr ', ' '\n' | grep -E '.*-service$' | sed 's/-service$//' | paste -sd "," - | sed 's/,$//')"
           affected_service_views="$(echo -n $affected | tr ', ' '\n' | grep -E '.*-service-views$' | sed 's/-service-views$//' | paste -sd "," - | sed 's/,$//')"
-          affected_non_services="$(echo -n $affected | tr ', ' '\n' | grep -vE '(@kitted|kitted|.*-service$|^website$)' | paste -sd "," - | sed 's/,$//')"
+          affected_non_services="$(echo -n $affected | tr ', ' '\n' | grep -vE '(@kitted|kitted|.*-service$|^website$|\[\])' | paste -sd "," - | sed 's/,$//')"
           should_upload_website="$(echo -n $affected | tr ', ' '\n' | grep -E '^website$' | paste -sd "," - | sed 's/,$//')"
           echo "affected packages/libs: $affected"
 
