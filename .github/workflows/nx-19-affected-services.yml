@@ -40,6 +40,9 @@ on:
       should_upload_website:
         description: 'If the website needs to be synced to s3'
         value: ${{ jobs.affected.outputs.should_upload_website }}
+      should_upload_storybook:
+        description: 'If the storybook needs to be synced to s3'
+        value: ${{ jobs.affected.outputs.should_upload_storybook }}
 
 jobs:
   affected:
@@ -51,6 +54,7 @@ jobs:
       non_services_to_deploy: ${{ steps.affected.outputs.non_services_to_deploy }}
       has_non_services_to_deploy: ${{ steps.affected.outputs.has_non_services_to_deploy }}
       should_upload_website: ${{ steps.affected.outputs.should_upload_website }}
+      should_upload_storybook: ${{ steps.affected.outputs.should_upload_storybook }}
     runs-on: ${{ inputs.runs_on }}
     steps:
       - name: Checkout the repo
@@ -96,6 +100,7 @@ jobs:
           affected_service_views="$(echo -n $affected | tr ', ' '\n' | grep -E '.*-service-views$' | sed 's/-service-views$//' | paste -sd "," - | sed 's/,$//')"
           affected_non_services="$(echo -n $affected | tr ', ' '\n' | grep -vE '(@kitted|kitted|.*-service$|^website$|\[\])' | paste -sd "," - | sed 's/,$//')"
           should_upload_website="$(echo -n $affected | tr ', ' '\n' | grep -E '^website$' | paste -sd "," - | sed 's/,$//')"
+          should_upload_storybook="$(echo -n $affected | tr ', ' '\n' | grep -E '^shared-components$' | paste -sd "," - | sed 's/,$//')"
           echo "affected packages/libs: $affected"
 
           echo -ne "services_to_deploy=[" >> "$GITHUB_OUTPUT"
@@ -122,6 +127,9 @@ jobs:
           echo -ne "should_upload_website=" >> "$GITHUB_OUTPUT"
           echo "$(if [ -z "$should_upload_website" ]; then echo "false"; else echo "true"; fi)" >> "$GITHUB_OUTPUT"
 
+          echo -ne "should_upload_storybook=" >> "$GITHUB_OUTPUT"
+          echo "$(if [ -z "$should_upload_storybook" ]; then echo "false"; else echo "true"; fi)" >> "$GITHUB_OUTPUT"
+
       - name: Print variables
         run: |
           echo "services_to_deploy: ${{ steps.affected.outputs.services_to_deploy }}"
@@ -131,3 +139,4 @@ jobs:
           echo "non_services_to_deploy: ${{ steps.affected.outputs.non_services_to_deploy }}"
           echo "has_non_services_to_deploy: ${{ steps.affected.outputs.has_non_services_to_deploy }}"
           echo "should_upload_website: ${{ steps.affected.outputs.should_upload_website }}"
+          echo "should_upload_storybook: ${{ steps.affected.outputs.should_upload_storybook }}"
